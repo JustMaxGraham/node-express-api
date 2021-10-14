@@ -1,6 +1,8 @@
+import MapStore from "../lib/mapstore.js";
 import { v4 as uuid } from "uuid";
 
 const NOTES = new Map();
+const store = new MapStore("notes.json");
 
 // Note {
 //  id: string,
@@ -8,6 +10,14 @@ const NOTES = new Map();
 //  body: string,
 //  lastEdited: Date  
 // }
+
+store.read().then((notes) => {
+  for (let [id, note] of notes) {
+    NOTES.set(id, note);
+  }
+}).catch(err => {
+  console.error(err);
+})
 
 export function getNotes(sort) {
   const notes = Array.from(NOTES.values())
@@ -21,7 +31,7 @@ export function getNotes(sort) {
   return notes;
 }
 
-export function createNote({ title, body }){
+export async function createNote({ title, body }){
   const id = uuid();
   const lastEdited = Date.now();
   const note = {
@@ -31,10 +41,11 @@ export function createNote({ title, body }){
     body
   }
   NOTES.set(id, note);
+  await store.save(NOTES);
   return { ...note };
 }
 
-export function updateNote(id, { title, body }) {
+export async function updateNote(id, { title, body }) {
   if (!NOTES.has(id)) {
     return null;
   }
@@ -42,6 +53,7 @@ export function updateNote(id, { title, body }) {
   note.title = title ?? note.title;
   note.nody = body ?? note.body;
   note.lastEdited = Date.now();
+  await store.save(NOTES);
   return { ... note };
 }
 
@@ -53,6 +65,8 @@ export function getNote(id) {
   return { ...note };
 }
 
-export function deleteNote(id) {
-  return NOTES.delete(id);
+export async function deleteNote(id) {
+  const success = NOTES.delete(id);
+  await store.save(NOTES);
+  return success;
 }
