@@ -1,16 +1,12 @@
 import express from "express";
 import morgan from "morgan";
+import routes from "./routes/index.js"
 
 const app = express();
 
 app.use(morgan("dev"));
 
-app.get("/", function(req, res) {
-  res.send("Hello")
-})
-app.get("/error", function(req, res) {
-  throw new Error("Oops, something went wrong!")
-})
+app.use(routes);
 
 app.use(function(req, res) {
   res.status(404).send("Page Not Found!")
