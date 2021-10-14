@@ -5,7 +5,7 @@ import routes from "./routes/index.js"
 const app = express();
 
 app.use(morgan("dev"));
-
+app.use(express.urlencoded( { extended: true }))
 app.use(routes);
 
 app.use(function(req, res) {
