@@ -1,42 +1,45 @@
+import * as Note from "../model/note.js"
+
 export function list(req, res) {
   let { sort } = req.query;
   sort = sort ? sort.toLowerCase() : "desc";
   if (!(sort === "asc" || sort === "desc")) {
     return res.status(400).send("Invalid sort param.")
   };
-  console.log({ sort })
-  res.json([]);
+  const notes = Note.getNotes(sort);
+  res.json( { notes });
 }
 
-export function create(req, res) {
+export async function create(req, res) {
   const { title, body }  = req.body;
   if ( title === undefined || body === undefined) {
     return res.status(400).send("Missing title or body");
   }
-  console.log(`${title} and ${body} recieved`)
+  const note = await Note.createNote({ title, body });
+  console.log({ note });
   res.send("Note Created.")
 }
 
 export function read(req, res){
   const { id } = req.params;
-  res.json({ 
-    title: "A sample Title",
-    body: "Sample body"
-  });
+  const note = Note.getNote(id);
+  res.json({ note });
 }
 
-export function update(req, res) {
+export async function update(req, res) {
   const { id } = req.params;
   const { title, body } = req.body;
   if (title === undefined && body === undefined) {
     return res.status(400).send("Missing title and/or body.")
   }
-  console.log(`Updating ${id} with ${title} and ${body}`)
-  res.send("Note Updated");
+  const note = await Note.updateNote(id, { title, body });
+  console.log({ note });
+  res.send(`Note ${id} updated.`)
 }
 
-export function deleteNote(req, res) {
+export async function deleteNote(req, res) {
   const { id } = req.params;
-  console.log(`Deleting ${id}`)
+  const success = await Note.deleteNote(id);
+  console.log(`Deleted note ${id}`, success)
   res.send("Note Deleted")
 }
